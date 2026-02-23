@@ -1,5 +1,33 @@
 # FitCoach AI — Claude Assistant Guide
 
+## Current Status
+> Last updated: 2026-02-23
+
+| Area | Status |
+|---|---|
+| Backend foundation | ✅ Complete and tested |
+| Auth endpoints | ✅ Working — `register`, `login`, `refresh`, `logout` |
+| AI module | ⚠️ Stubs only — `client`, `context_builder`, `token_budget`, all prompts |
+| Service layer | ⚠️ Stubs only — `pr`, `workout`, `body_stats`, `recovery`, `report` |
+| Test suite | ✅ 5/5 passing (health check + 4 auth tests) |
+| Frontend | ❌ Not started |
+
+### What's wired up
+- FastAPI app starts cleanly with all routers registered
+- Auth flow (JWT + bcrypt + refresh tokens) is fully functional
+- SQLite used for local dev; all models/migrations scaffolded
+- `tests/conftest.py` provides a per-test in-memory SQLite `AsyncClient` fixture
+
+### Package manager
+Use **`uv`** for all Python commands — not `pip`:
+```bash
+uv sync --extra dev   # install deps
+uv run pytest tests/ -v
+uv run uvicorn app.main:app --reload --port 8000
+```
+
+---
+
 ## Project Overview
 FitCoach AI is a production-quality fitness coaching web application with AI-powered personalization via OpenAI API. Features: workout tracking, nutrition planning, progress reporting, recovery tracking, hydration logging, and personal records.
 
