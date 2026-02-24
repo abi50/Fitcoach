@@ -3,6 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.dependencies import get_current_user, get_db
 from app.models.user import User, UserProfile
@@ -34,5 +35,7 @@ async def update_profile(
         setattr(profile, field, value)
 
     await db.flush()
-    await db.refresh(current_user)
-    return current_user
+    user_result = await db.execute(
+        select(User).where(User.id == current_user.id).options(selectinload(User.profile))
+    )
+    return user_result.scalar_one()

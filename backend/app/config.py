@@ -17,10 +17,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
 
-    # Anthropic
-    ANTHROPIC_API_KEY: str = ""
-    CLAUDE_OPUS_MODEL: str = "claude-opus-4-6"
-    CLAUDE_HAIKU_MODEL: str = "claude-haiku-4-5-20251001"
+    # OpenAI
+    OPENAI_API_KEY: str = ""
+    OPENAI_MODEL: str = "gpt-4o"
     DAILY_TOKEN_BUDGET: int = 100000
 
     # Redis

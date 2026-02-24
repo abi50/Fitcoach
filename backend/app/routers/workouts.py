@@ -16,6 +16,7 @@ from app.models.workout import (
     WorkoutSession,
 )
 from app.schemas.workout import (
+    ExerciseCreate,
     SessionSetCreate,
     SessionSetResponse,
     WorkoutPlanCreate,
@@ -45,6 +46,29 @@ async def list_exercises(
     result = await db.execute(query.limit(50))
     exercises = result.scalars().all()
     return {"data": [{"id": e.id, "name": e.name, "category": e.category, "muscle_groups": e.muscle_groups, "equipment": e.equipment} for e in exercises]}
+
+
+@router.post("/exercises", status_code=status.HTTP_201_CREATED)
+async def create_exercise(
+    data: ExerciseCreate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    exercise = Exercise(
+        is_custom=True,
+        created_by=current_user.id,
+        **data.model_dump(),
+    )
+    db.add(exercise)
+    await db.flush()
+    await db.refresh(exercise)
+    return {
+        "id": exercise.id,
+        "name": exercise.name,
+        "category": exercise.category,
+        "muscle_groups": exercise.muscle_groups,
+        "equipment": exercise.equipment,
+    }
 
 
 @router.get("/plans", response_model=list[WorkoutPlanResponse])
@@ -144,7 +168,10 @@ async def complete_session(
 
     session.completed_at = datetime.now(UTC)
     if session.started_at:
-        delta = session.completed_at - session.started_at
+        started = session.started_at
+        if started.tzinfo is None:
+            started = started.replace(tzinfo=UTC)
+        delta = session.completed_at - started
         session.duration_minutes = int(delta.total_seconds() / 60)
     session.total_volume_kg = calculate_session_volume(session.sets)
 

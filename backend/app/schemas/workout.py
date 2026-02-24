@@ -3,6 +3,13 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
+class ExerciseCreate(BaseModel):
+    name: str
+    category: str
+    muscle_groups: list[str] | None = None
+    equipment: str | None = None
+
+
 class ExerciseResponse(BaseModel):
     id: str
     name: str

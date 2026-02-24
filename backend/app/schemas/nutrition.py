@@ -50,3 +50,14 @@ class NutritionLogResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class FoodItemCreate(BaseModel):
+    name: str
+    brand: str | None = None
+    calories_per_100g: float | None = None
+    protein_per_100g: float | None = None
+    carbs_per_100g: float | None = None
+    fat_per_100g: float | None = None
+    serving_size_g: float | None = None
+    serving_name: str | None = None

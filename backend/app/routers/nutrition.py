@@ -10,7 +10,7 @@ from sqlalchemy.orm import selectinload
 from app.dependencies import get_current_user, get_db
 from app.models.nutrition import FoodItem, MealEntry, NutritionLog
 from app.models.user import User
-from app.schemas.nutrition import MealEntryCreate, NutritionLogResponse
+from app.schemas.nutrition import FoodItemCreate, MealEntryCreate, NutritionLogResponse
 
 router = APIRouter()
 
@@ -93,3 +93,33 @@ async def log_meal(
     await db.flush()
     await db.refresh(entry)
     return entry
+
+
+@router.get("/tdee")
+async def get_tdee(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.services.nutrition_service import calculate_user_tdee
+    return await calculate_user_tdee(db, current_user.id)
+
+
+@router.post("/foods", status_code=201)
+async def create_food(
+    data: FoodItemCreate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    food = FoodItem(created_by=current_user.id, **data.model_dump())
+    db.add(food)
+    await db.flush()
+    await db.refresh(food)
+    return {
+        "id": food.id,
+        "name": food.name,
+        "brand": food.brand,
+        "calories_per_100g": food.calories_per_100g,
+        "protein_per_100g": food.protein_per_100g,
+        "carbs_per_100g": food.carbs_per_100g,
+        "fat_per_100g": food.fat_per_100g,
+    }

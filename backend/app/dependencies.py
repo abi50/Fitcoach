@@ -58,3 +58,20 @@ async def get_current_active_user(
     current_user: User = Depends(get_current_user),
 ) -> User:
     return current_user
+
+
+async def get_optional_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
+    db: AsyncSession = Depends(get_db),
+) -> User | None:
+    """Return the current user if a valid token is present, else None (guest)."""
+    if not credentials:
+        return None
+    token_data = decode_access_token(credentials.credentials)
+    if not token_data:
+        return None
+    result = await db.execute(select(User).where(User.id == token_data.user_id))
+    user = result.scalar_one_or_none()
+    if not user or not user.is_active:
+        return None
+    return user
